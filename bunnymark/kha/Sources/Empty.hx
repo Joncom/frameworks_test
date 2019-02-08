@@ -8,6 +8,8 @@ import kha.Scheduler;
 import kha.System;
 import kha.input.Mouse;
 
+using StringTools;
+
 /**
  * ...
  * @author The Mozok Team - Dmitry Hryppa
@@ -15,7 +17,7 @@ import kha.input.Mouse;
 
 class Empty 
 {
-    private var bunnyTex:Image;
+    private var bunnyTex:Array<Image> = [];
     private var font:Font;
 
     private var bCount:Int = 0;
@@ -40,13 +42,18 @@ class Empty
         Assets.loadEverything(function():Void 
         {
             font = Assets.fonts.mainfont;
-            bunnyTex = Assets.images.wabbit_alpha;
+
+            for(name in Assets.images.names) {
+                if(name.startsWith("wabbit_alpha")) {
+                    bunnyTex.push(Assets.images.get(name));
+                }
+            }
             
             bunnies = new Array<Bunny>();
             minX = 0;
-            maxX = Main.SCREEN_W - bunnyTex.width;
+            maxX = Main.SCREEN_W - bunnyTex[0].width;
             minY = 0;
-            maxY = Main.SCREEN_H - bunnyTex.height;
+            maxY = Main.SCREEN_H - bunnyTex[0].height;
             
             
             Mouse.get().notify(mouseDown, null, null, null);
@@ -57,7 +64,7 @@ class Empty
 
     private function mouseDown(button:Int, x:Int, y:Int):Void 
     {
-        var count:Int = button == 0 ? 10000 : 1000;
+        var count:Int = 10; // button == 0 ? 10000 : 1000;
         for (i in 0...count) {
             var bunny:Bunny = new Bunny();
             bunny.speedX = Math.random() * 5;
@@ -108,8 +115,13 @@ class Empty
         
         framebuffer.g2.begin(true, backgroundColor);
         framebuffer.g2.color = 0xFFFFFFFF;
+        var i = 0;
         for (bunny in bunnies){
-            framebuffer.g2.drawImage(bunnyTex, bunny.x, bunny.y);
+            if(i >= bunnyTex.length) {
+                throw "Need more textures for this bunny count";
+            }
+            framebuffer.g2.drawImage(bunnyTex[i], bunny.x, bunny.y);
+            i++;
         }
         
         framebuffer.g2.font = font;
